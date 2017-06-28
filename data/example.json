@@ -1,0 +1,9 @@
+[{
+        "drive": "dsfa", //folder id
+        "channel": "adfa" //channel id
+    },
+    {
+        "drive": "dsfa",
+        "channel": "adfa"
+    }
+]
