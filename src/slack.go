@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-
-	"io/ioutil"
 
 	"github.com/nlopes/slack"
 )
@@ -89,15 +86,4 @@ func checkError(err error) bool {
 		return true
 	}
 	return false
-}
-
-// GetFilesByChannel obtains the relation of files in this channel
-func GetFilesByChannel(path string) {
-	file, err := ioutil.ReadFile(path)
-	if checkError(err) {
-		return
-	}
-	var ds []DriveSlack
-	json.Unmarshal(file, &ds)
-	// pretty.Println(ds)
 }

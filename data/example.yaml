@@ -1,4 +1,4 @@
 slack-token: "" #Paste your token slack account 
-drive-token: ""
-icon-url: ""
-username: ""
+drive-token: "" #Paste your token drive account
+icon-url: "" #IconURL of senter to message
+username: "" #Name of sender to message

@@ -22,15 +22,15 @@ type DriveSlack struct {
 }
 
 var (
-	conf = data{}
-	info *string
+	conf            = data{}
+	relation, files *string
 )
 
 func init() {
 	dataConfig := flag.String("data", "", "path to YAML configuration")
-	info = flag.String("info", "", "path to file information")
+	relation = flag.String("info", "", "path to relation driveID and channelID")
 	flag.Parse()
-	if len(*dataConfig)*len(*info) <= 0 {
+	if len(*dataConfig)*len(*relation) <= 0 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -42,16 +42,21 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
 	SetVars()
 }
 
 func main() {
-	message := "He adjuntado un archivo http://www.example.com.mx"
-	RegisterMessage("random", message)
+	// message := "He adjuntado un archivo http://www.example.com.mx"
+	// RegisterMessage("random", message)
 
 	// GetChannels()
 
 	// GetGroups()
 
-	// GetFilesByChannel(*info)
+	relationArray := GetRelationFromFile(*relation)
+	if len(relationArray) == 0 {
+		panic("No hay relaciones registradas")
+	}
+
 }
