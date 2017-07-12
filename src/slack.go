@@ -17,7 +17,7 @@ var (
 func SetVars() {
 	iconURL = conf.IconURL
 	tokenSlack = conf.Slack
-	tokenDrive = conf.Slack
+	tokenDrive = conf.Drive
 	username = conf.Username
 }
 

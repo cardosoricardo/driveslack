@@ -58,5 +58,5 @@ func main() {
 	if len(relationArray) == 0 {
 		panic("No hay relaciones registradas")
 	}
-
+	GetResponseFolder("0B9kaSejrgCGDYnNxZzRaWFhhUWs")
 }
