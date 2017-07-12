@@ -69,8 +69,8 @@ func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root b
 
 	for _, file := range drive.Items {
 		template := getTemplate(file)
-
-		if date, _ := time.Parse(time.RFC3339, file.Updated); lastUpdated == date { //
+		dateFile, _ := time.Parse(time.RFC3339, file.Updated)
+		if dateFile.Before(lastUpdated) || dateFile.Equal(lastUpdated) { //
 			break
 		}
 		//fmt.Println("message")
