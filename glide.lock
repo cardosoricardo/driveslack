@@ -1,0 +1,12 @@
+hash: 51ed515dda93bd6034aa913fd2217820f05af8a70e4c0f6183b9362c5b8b9645
+updated: 2017-07-12T16:17:45.426916797-05:00
+imports:
+- name: github.com/nlopes/slack
+  version: ca8436d76f805ec1e682eaae2de3c3a9bc894b0f
+- name: golang.org/x/net
+  version: f315505cf3349909cdf013ea56690da34e96a451
+  subpackages:
+  - websocket
+- name: gopkg.in/yaml.v2
+  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
+testImports: []
