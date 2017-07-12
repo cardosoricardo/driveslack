@@ -4,6 +4,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -48,7 +49,7 @@ func init() {
 
 func main() {
 	// message := "He adjuntado un archivo http://www.example.com.mx"
-	// RegisterMessage("random", message)
+	// RegisterMessage(templateNewFile, "C2J3MQH98", message)
 
 	// GetChannels()
 
@@ -58,5 +59,8 @@ func main() {
 	if len(relationArray) == 0 {
 		panic("No hay relaciones registradas")
 	}
-	GetResponseFolder("0B9kaSejrgCGDYnNxZzRaWFhhUWs")
+
+	for _, relation := range relationArray {
+		GetResponseFolder(relation.DriveID, relation.ChannelID, time.Time{}, true)
+	}
 }

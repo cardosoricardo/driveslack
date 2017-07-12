@@ -28,18 +28,19 @@ type Channel struct {
 }
 
 //RegisterMessage register a mmesage in channel
-func RegisterMessage(channel, message string) {
+func RegisterMessage(template, channelID, username, filename, url string) {
+	message := fmt.Sprintf(template, username, filename, url)
 	api := slack.New(tokenSlack)
 	params := slack.PostMessageParameters{
 		IconURL:  iconURL,
 		Username: username,
 	}
-	channelID, _, err := api.PostMessage(channel, message, params)
+	_, _, err := api.PostMessage(channelID, message, params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("Message successfully sent to channel %s", channelID)
+	fmt.Printf(message)
 }
 
 //GetChannels obtains the list of his channels
