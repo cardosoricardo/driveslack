@@ -40,7 +40,7 @@ func RegisterMessage(template, channelID, username, filename, url string) {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf(message)
+	//fmt.Printf(message)
 }
 
 //GetChannels obtains the list of his channels
@@ -59,7 +59,7 @@ func GetChannels() {
 
 		channels = append(channels, channel)
 	}
-	// pretty.Println(channels)
+	// fmt.Println(channels)
 }
 
 //GetGroups obtains the list of his private channels
@@ -78,7 +78,7 @@ func GetGroups() {
 
 		channels = append(channels, channel)
 	}
-	// pretty.Println(channels)
+	// fmt.Println(channels)
 }
 
 func checkError(err error) bool {
