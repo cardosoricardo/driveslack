@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -69,13 +68,13 @@ func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root b
 	}
 
 	for _, file := range drive.Items {
-		//template := getTemplate(file)
+		template := getTemplate(file)
 
 		if date, _ := time.Parse(time.RFC3339, file.Updated); lastUpdated == date { //
 			break
 		}
-		fmt.Println("message")
-		//RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
+		//fmt.Println("message")
+		RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
 
 		if file.Type == typeFolder {
 			GetResponseFolder(file.ID, channelID, lastUpdated, false)
