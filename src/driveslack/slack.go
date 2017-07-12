@@ -10,7 +10,7 @@ var (
 	iconURL    string
 	tokenSlack string
 	tokenDrive string
-	username   string
+	nameSender string
 )
 
 //SetVars set tokens.
@@ -18,7 +18,7 @@ func SetVars() {
 	iconURL = conf.IconURL
 	tokenSlack = conf.Slack
 	tokenDrive = conf.Drive
-	username = conf.Username
+	nameSender = conf.Username
 }
 
 //Channel define a struct of channel's slack
@@ -33,7 +33,7 @@ func RegisterMessage(template, channelID, username, filename, url string) {
 	api := slack.New(tokenSlack)
 	params := slack.PostMessageParameters{
 		IconURL:  iconURL,
-		Username: username,
+		Username: nameSender,
 	}
 	_, _, err := api.PostMessage(channelID, message, params)
 	if err != nil {
