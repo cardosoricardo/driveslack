@@ -1,5 +1,5 @@
 data/debug.yaml
 data/info.json
-src/db.txt
-src/src
-vendor/
+src/driveslack/db.txt
+src/driveslack/driveslack
+src/vendor
