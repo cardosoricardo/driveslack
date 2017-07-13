@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"fmt"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -59,11 +61,17 @@ func main() {
 			case <-ticker.C:
 				relationArray := GetRelationFromFile(*relation)
 				if len(relationArray) == 0 {
-					panic("No hay relaciones registradas")
+					panic("relations not register")
 				}
 
 				for _, relation := range relationArray {
-					GetResponseFolder(relation.DriveID, relation.ChannelID, time.Time{}, true)
+					fmt.Println("request")
+					lastDate := GetResponseFolder(relation.DriveID, relation.ChannelID, time.Time{}, true)
+					if lastDate == (time.Time{}) {
+						return
+					}
+					Save(relation.DriveID, lastDate)
+
 				}
 
 				ticker = time.NewTicker(time.Duration(periodicTime) * time.Minute)

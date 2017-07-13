@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -28,14 +27,13 @@ type DriveFolder struct {
 
 //ItemDrive contains information about file
 type ItemDrive struct {
-	ID           string `json:"id"`
-	Title        string `json:"title"`
-	Updated      string `json:"modifiedDate"`
-	Created      string `json:"createdDate"`
-	Version      string `json:"version"`
-	OwnerUpdated string `json:"lastModifyingUserName"`
-	URL          string `json:"alternateLink"`
-	Type         string `json:"mimeType"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	Updated      time.Time `json:"modifiedDate"`
+	Created      time.Time `json:"createdDate"`
+	OwnerUpdated string    `json:"lastModifyingUserName"`
+	URL          string    `json:"alternateLink"`
+	Type         string    `json:"mimeType"`
 }
 
 //GetResponseFolder obtains the information about folder of google drive
@@ -62,24 +60,19 @@ func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root b
 	if lastUpdated == (time.Time{}) { //last date saves in db by folderID
 		lastUpdated = Get(folderID)
 	}
-	//lastDate = drive.Items[0].Updated
 	maxDate := lastUpdated
-	//fmt.Println(lastUpdated)
 	for _, file := range drive.Items {
-		//template := getTemplate(file)
-		dateFile, _ := time.Parse(time.RFC3339, file.Updated)
+		template := getTemplate(file)
+		dateFile := file.Updated
 		if dateFile.After(lastUpdated) {
-			fmt.Println("message", file.Title)
-			// RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
+			ex := RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
+			if checkError(ex) {
+				return time.Time{}
+			}
 		}
 		if dateFile.After(maxDate) {
 			maxDate = dateFile
 		}
-
-		// if (dateFile.Before(lastUpdated) || dateFile.Equal(lastUpdated)) && file.Type != typeFolder { //compare two times
-		// 	break
-		// }
-		//fmt.Println("message")
 
 		if file.Type == typeFolder {
 			lastDate := GetResponseFolder(file.ID, channelID, lastUpdated, false)
@@ -88,21 +81,13 @@ func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root b
 			}
 		}
 	}
-	// fmt.Println(maxDate)
-	if root {
-		// f, err := time.Parse(time.UnixDate, maxDate.String())
-		// fmt.Println(err)
-		Save(folderID, maxDate.Format(time.RFC3339))
-	}
 	return maxDate
 }
 
 //getTemplate obatins template message of slack
 func getTemplate(file ItemDrive) (template string) {
 
-	t1, _ := time.Parse(time.RFC3339, file.Created)
-	t2, _ := time.Parse(time.RFC3339, file.Updated)
-	if t1 == t2 {
+	if file.Created == file.Updated {
 		switch file.Type {
 		case typeFolder:
 			template = templateNewFolder

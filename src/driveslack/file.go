@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -19,8 +18,8 @@ func GetRelationFromFile(path string) (ds []DriveSlack) {
 }
 
 //Save insert relation folderID with last date get informacion in the file
-func Save(folderID, lastDate string) {
-	data := map[string]string{}
+func Save(folderID string, lastDate time.Time) {
+	data := map[string]time.Time{}
 	pathDB := ("db.txt")
 	// s.OpenFile(pathDB, os.O_RDONLY|os.O_CREATE, 0666)
 	if _, err := os.Stat(pathDB); os.IsNotExist(err) {
@@ -34,12 +33,17 @@ func Save(folderID, lastDate string) {
 	if checkError(err) {
 		return
 	}
+	defer file.Close()
 
 	if f, _ := file.Stat(); f.Size() > 0 {
 		err = json.NewDecoder(file).Decode(&data)
 		if checkError(err) {
 			return
 		}
+	}
+
+	if data[folderID] == lastDate {
+		return
 	}
 
 	err = file.Truncate(0) //empty file
@@ -63,14 +67,11 @@ func Save(folderID, lastDate string) {
 	if checkError(err) {
 		return
 	}
-
-	defer file.Close()
-
 }
 
 //Get obtains relation folderID with last date get informacion
 func Get(folderID string) (lastDate time.Time) {
-	data := map[string]string{}
+	data := map[string]time.Time{}
 	pathDB := ("db.txt")
 
 	if _, err := os.Stat(pathDB); os.IsNotExist(err) {
@@ -96,12 +97,8 @@ func Get(folderID string) (lastDate time.Time) {
 	}
 
 	defer file.Close()
-	if data[folderID] != "" {
-		lastDate, err = time.Parse(time.RFC3339, data[folderID])
-		if checkError(err) {
-			return
-		}
-		fmt.Println(lastDate)
+	if data[folderID] != (time.Time{}) {
+		lastDate = data[folderID]
 	}
 	return
 }

@@ -28,7 +28,7 @@ type Channel struct {
 }
 
 //RegisterMessage register a mmesage in channel
-func RegisterMessage(template, channelID, username, filename, url string) {
+func RegisterMessage(template, channelID, username, filename, url string) error {
 	message := fmt.Sprintf(template, username, filename, url)
 	api := slack.New(tokenSlack)
 	params := slack.PostMessageParameters{
@@ -38,9 +38,9 @@ func RegisterMessage(template, channelID, username, filename, url string) {
 	_, _, err := api.PostMessage(channelID, message, params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
-		return
+		return err
 	}
-	//fmt.Printf(message)
+	return err
 }
 
 //GetChannels obtains the list of his channels
@@ -79,12 +79,4 @@ func GetGroups() {
 		channels = append(channels, channel)
 	}
 	// fmt.Println(channels)
-}
-
-func checkError(err error) bool {
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return true
-	}
-	return false
 }
