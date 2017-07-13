@@ -90,9 +90,9 @@ func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root b
 	}
 	// fmt.Println(maxDate)
 	if root {
-		f, err := time.Parse(time.UnixDate, maxDate.String())
-		fmt.Println(err)
-		Save(folderID, f.Format(time.RFC3339))
+		// f, err := time.Parse(time.UnixDate, maxDate.String())
+		// fmt.Println(err)
+		Save(folderID, maxDate.Format(time.RFC3339))
 	}
 	return maxDate
 }
