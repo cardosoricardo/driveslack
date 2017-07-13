@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -38,50 +39,62 @@ type ItemDrive struct {
 }
 
 //GetResponseFolder obtains the information about folder of google drive
-func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root bool) {
+func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root bool) time.Time {
 
 	var drive DriveFolder
-	var lastDate string
+	//var lastDate string
 
 	resp, err := http.Get("https://www.googleapis.com/drive/v2/files?q=%27" + folderID + "%27+in+parents&key=" + tokenDrive)
 	if checkError(err) {
-		return
+		return time.Time{}
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if checkError(err) {
-		return
+		return time.Time{}
 	}
 	json.Unmarshal(body, &drive)
 
 	if len(drive.Items) == 0 {
-		return
+		return time.Time{}
 	}
 	if lastUpdated == (time.Time{}) { //last date saves in db by folderID
 		lastUpdated = Get(folderID)
 	}
-	lastDate = drive.Items[0].Updated
-
-	if root {
-		Save(folderID, lastDate)
-	}
-
+	//lastDate = drive.Items[0].Updated
+	maxDate := lastUpdated
+	//fmt.Println(lastUpdated)
 	for _, file := range drive.Items {
-		template := getTemplate(file)
+		//template := getTemplate(file)
 		dateFile, _ := time.Parse(time.RFC3339, file.Updated)
-		if dateFile.Before(lastUpdated) || dateFile.Equal(lastUpdated) { //compare two times
-			break
+		if dateFile.After(lastUpdated) {
+			fmt.Println("message", file.Title)
+			// RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
 		}
+		if dateFile.After(maxDate) {
+			maxDate = dateFile
+		}
+
+		// if (dateFile.Before(lastUpdated) || dateFile.Equal(lastUpdated)) && file.Type != typeFolder { //compare two times
+		// 	break
+		// }
 		//fmt.Println("message")
-		RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
 
 		if file.Type == typeFolder {
-			GetResponseFolder(file.ID, channelID, lastUpdated, false)
-			continue
+			lastDate := GetResponseFolder(file.ID, channelID, lastUpdated, false)
+			if lastDate.After(maxDate) {
+				maxDate = lastDate
+			}
 		}
 	}
-
+	// fmt.Println(maxDate)
+	if root {
+		f, err := time.Parse(time.UnixDate, maxDate.String())
+		fmt.Println(err)
+		Save(folderID, f.Format(time.RFC3339))
+	}
+	return maxDate
 }
 
 //getTemplate obatins template message of slack

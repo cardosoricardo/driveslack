@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -84,7 +85,10 @@ func Get(folderID string) (lastDate time.Time) {
 		return
 	}
 
-	if f, _ := file.Stat(); f.Size() > 0 {
+	if f, ex := file.Stat(); f.Size() > 0 {
+		if checkError(ex) {
+			return
+		}
 		err = json.NewDecoder(file).Decode(&data)
 		if checkError(err) {
 			return
@@ -92,6 +96,12 @@ func Get(folderID string) (lastDate time.Time) {
 	}
 
 	defer file.Close()
-	lastDate, _ = time.Parse(time.RFC3339, data[folderID])
+	if data[folderID] != "" {
+		lastDate, err = time.Parse(time.RFC3339, data[folderID])
+		if checkError(err) {
+			return
+		}
+		fmt.Println(lastDate)
+	}
 	return
 }
