@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -7,13 +7,9 @@ import (
 	"time"
 )
 
-var relationMap map[string]string
-
 var (
 	typeFolder = "application/vnd.google-apps.folder"
-)
 
-var (
 	templateNewFolder    = "%s creó la carpeta %s en %s"
 	templateNewFile      = "%s creó el archivo %s  en %s"
 	templateUpdateFile   = "%s actualizó el archivo %s en %s"
@@ -37,75 +33,66 @@ type ItemDrive struct {
 }
 
 //GetResponseFolder obtains the information about folder of google drive
-func GetResponseFolder(folderID, channelID string, lastUpdated time.Time, root bool) time.Time {
+func GetResponseFolder(folderID, channelID string, lastUpdated time.Time) (time.Time, error) {
 
 	var drive DriveFolder
 	//var lastDate string
 
-	resp, err := http.Get("https://www.googleapis.com/drive/v2/files?q=%27" + folderID + "%27+in+parents&key=" + tokenDrive)
+	resp, err := http.Get("https://www.googleapis.com/drive/v2/files?q=%27" + folderID + "%27+in+parents&key=" + conf.Drive)
 	if checkError(err) {
-		return time.Time{}
+		return time.Time{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if checkError(err) {
-		return time.Time{}
+		return time.Time{}, err
 	}
 	json.Unmarshal(body, &drive)
 
 	if len(drive.Items) == 0 {
-		return time.Time{}
+		return time.Time{}, nil
 	}
+
 	if lastUpdated == (time.Time{}) { //last date saves in db by folderID
-		lastUpdated = Get(folderID)
+		lastUpdated = get(folderID)
 	}
 	maxDate := lastUpdated
 	for _, file := range drive.Items {
 		template := getTemplate(file)
 		dateFile := file.Updated
 		if dateFile.After(lastUpdated) {
-			ex := RegisterMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
-			if checkError(ex) {
-				return time.Time{}
+			err := registerMessage(template, channelID, file.OwnerUpdated, file.Title, file.URL)
+			if checkError(err) {
+				return time.Time{}, err
 			}
 		}
 		if dateFile.After(maxDate) {
 			maxDate = dateFile
 		}
-
 		if file.Type == typeFolder {
-			lastDate := GetResponseFolder(file.ID, channelID, lastUpdated, false)
+			lastDate, _ := GetResponseFolder(file.ID, channelID, lastUpdated)
 			if lastDate.After(maxDate) {
 				maxDate = lastDate
 			}
 		}
 	}
-	return maxDate
+	return maxDate, nil
 }
 
 //getTemplate obatins template message of slack
-func getTemplate(file ItemDrive) (template string) {
-
-	if file.Created == file.Updated {
-		switch file.Type {
-		case typeFolder:
-			template = templateNewFolder
-			break
-		default:
-			template = templateNewFile
-			break
+func getTemplate(file ItemDrive) string {
+	new := file.Created == file.Updated
+	switch file.Type {
+	case typeFolder:
+		if new {
+			return templateNewFolder
 		}
-	} else {
-		switch file.Type {
-		case typeFolder:
-			template = templateUpdateFolder
-			break
-		default:
-			template = templateUpdateFile
-			break
+		return templateUpdateFolder
+	default:
+		if new {
+			return templateNewFile
 		}
+		return templateUpdateFile
 	}
-
-	return
 }

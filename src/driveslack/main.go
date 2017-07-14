@@ -6,36 +6,23 @@ import (
 	"os"
 	"time"
 
-	"fmt"
+	"github.com/cardosoricardo/driveslack/src/driveslack/app"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
-type data struct {
-	Slack    string `yaml:"slack-token"`
-	Drive    string `yaml:"drive-token"`
-	IconURL  string `yaml:"icon-url"`
-	Username string `yaml:"username"`
-}
-
-//DriveSlack defines a struct of relation between drive id and slack id
-type DriveSlack struct {
-	ChannelID string `json:"channel"`
-	DriveID   string `json:"drive"`
-}
-
 var (
-	conf            = data{}
+	conf            = app.Config{}
 	relation, files *string
 	minutes         *int
 )
 
 func init() {
 	dataConfig := flag.String("c", "", "path to YAML configuration")
-	relation = flag.String("d", "", "path to relation driveID and channelID")
+	relation = flag.String("r", "", "path to relation driveID and channelID JSON file")
 	minutes = flag.Int("t", 15, "time to execute the periodic task in minutes")
 	flag.Parse()
-	if len(*dataConfig)*len(*relation) <= 0 {
+	if len(*dataConfig)*len(*relation) == 0 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -48,30 +35,23 @@ func init() {
 		panic(err)
 	}
 
-	SetVars()
+	app.SetVars(conf)
 }
 
 func main() {
 	periodicTime := *minutes
-	ticker := time.NewTicker(time.Duration(periodicTime) * time.Minute)
-
+	ticker := time.NewTicker(time.Second)
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				relationArray := GetRelationFromFile(*relation)
-				if len(relationArray) == 0 {
-					panic("relations not register")
-				}
-
+				relationArray, _ := app.GetRelationFromFile(*relation)
 				for _, relation := range relationArray {
-					fmt.Println("request")
-					lastDate := GetResponseFolder(relation.DriveID, relation.ChannelID, time.Time{}, true)
+					lastDate, _ := app.GetResponseFolder(relation.DriveID, relation.ChannelID, time.Time{})
 					if lastDate == (time.Time{}) {
 						return
 					}
-					Save(relation.DriveID, lastDate)
-
+					app.Save(relation.DriveID, lastDate)
 				}
 
 				ticker = time.NewTicker(time.Duration(periodicTime) * time.Minute)
@@ -80,6 +60,5 @@ func main() {
 	}()
 
 	quit := make(chan bool, 1)
-	// main will continue to wait untill there is an entry in quit
 	<-quit
 }
