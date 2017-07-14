@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cardosoricardo/driveslack/src/driveslack/app"
+	"github.com/cardosoricardo/driveslack/app"
 
 	yaml "gopkg.in/yaml.v2"
 )
